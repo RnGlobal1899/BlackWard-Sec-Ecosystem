@@ -1,0 +1,16 @@
+# Windows system files
+desktop.ini
+Thumbs.db
+
+# OS / Editor artifacts
+.DS_Store
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.log
+
+# Environment / secrets
+.env
+*.env
