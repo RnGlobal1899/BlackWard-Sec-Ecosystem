@@ -53,7 +53,7 @@ Implementei rigorosamente os protocolos de autenticação para garantir o não-r
     figura 7: DKIM verificado
 
     • DMARC: Estabeleci uma política de Quarentena (p=quarantine) para monitorar e isolar qualquer tentativa de uso não autorizado do domínio.
-![Configuração DMARC](images/configuração%20DMARC.png)
+![Configuração DMARC](images/configuracao%20DMARC.png)
     figura 8: Configuração DMARC
 
 ![DMARC verificado](images/DMARC%20verificado.png)
@@ -66,26 +66,29 @@ Desenhei minha arquitetura de identidade para mitigar riscos de movimentação l
     • Princípio do Menor Privilégio (PoLP): Realizo acessos operacionais diários via conta bruno.analyst@, com permissões restritas ao grupo operacional "Analistas".                                                                                                                                                
     • Segurança de Acesso: Implementei MFA (TOTP) obrigatório e políticas de Session Timeout para invalidar sessões persistentes.
 
-![Usuários](images/usuários.png)
+![Usuários](images/usuarios.png)
     figura 10: Separação de usuários
 
 ![Grupos](images/grupos.png)
     figura 11: Separação de grupos
+
+![MFA configurado no OneAuth](images/MFA.png)                                                                                                                  
+    figura 12: MFA configurado no OneAuth (usuário Roberto é fictício)
 
 *4. AUDITORIA E VALIDAÇÃO FINAL*                                                                                                                                
 Submeti toda a infraestrutura a testes de "fogo" para garantir a eficácia dos controles:
 
     • Teste de envio: Eu enviei uma mensagem de teste para um outro gmail para garantir que iria para a caixa de entrada principal, confirmando a configuração correta do servidor.
 ![Email recebido](images/email%20recebido.png)
-    figura 12: Email recebido
+    figura 13: Email recebido
 
     • Mail-Tester Score (8.2/10): Obtive status PASS em todos os protocolos de autenticação. Analisei a perda de pontos como um fator extrínseco devido à reputação da TLD .xyz e à ausência proposital de cabeçalhos de marketing.
 ![Teste de email](images/email%20testing.png)
-    figura 12: Teste de email
+    figura 14: Teste de email
 
     • Validação ANY.RUN: Minha infraestrutura foi reconhecida como corporativa e segura, garantindo acesso à conta profissional da sandbox para minhas análises de malware.
 ![anyrun](images/anyrun.png)
-    figura 12: Anyrun
+    figura 15: Anyrun
 
 Analista: Bruno Eduardo                    
 Última Auditoria: 26/01/2026
