@@ -1,4 +1,4 @@
-                                               🏗️ BlackWard Security LAB: Architecture Overview 🛡️
+                                 🏗️ BlackWard Security LAB: Architecture Overview 🛡️
 
 Bem-vindo ao centro de documentação técnica do BlackWard Security LAB. Este projeto consiste na implementação de uma infraestrutura corporativa simulada de pequeno porte, distribuída em um ambiente Multi-Cloud Híbrido (Oracle Cloud, Azure, DigitalOcean e Google Cloud). O laboratório visa superar as limitações de hardware local (Athlon 3000G e 8GB de RAM), movendo cargas de trabalho críticas para a nuvem através de uma estratégia de offloading setorial e interconexão de alta disponibilidade.
 
