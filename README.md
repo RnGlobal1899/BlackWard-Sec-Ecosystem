@@ -1,41 +1,48 @@
-                                                    🏗️ BlackWard Security LAB: Architecture Overview
+                                                    🏗️ BlackWard Security LAB: Architecture Overview 🛡️
 
-Bem-vindo ao centro de documentação técnica do BlackWard Security LAB. Este projeto representa um ecossistema híbrido (Cloud & On-Premises) projetado para simular cenários reais de infraestrutura corporativa, desenvolvimento ofensivo e operações de defesa cibernética.
+Bem-vindo ao centro de documentação técnica do BlackWard Security LAB. Este projeto consiste na implementação de uma infraestrutura corporativa simulada de pequeno porte, distribuída em um ambiente Multi-Cloud Híbrido (Oracle Cloud, Azure, DigitalOcean e Google Cloud). O laboratório visa superar as limitações de hardware local (Athlon 3000G e 8GB de RAM), movendo cargas de trabalho críticas para a nuvem através de uma estratégia de offloading setorial e interconexão de alta disponibilidade.
 
 O laboratório é rigorosamente dividido em quatro módulos interdependentes, permitindo uma abordagem de aprendizado em 360 graus na área de Tecnologia da Informação e Segurança.
 
-🛠️ Módulo 1: Infraestrutura & Suporte TI
-Objetivo: Estabelecer a base corporativa e demonstrar maturidade na gestão de ativos e suporte proativo.
+🛠️ Módulo 1: Identidade e Infraestrutura de Gestão
+Objetivo: Estabelecer a base gerencial estável e a autoridade de identidade do ecossistema.
 
-    • Cloud Provisioning (OCI): Utilizo instâncias Ubuntu ARM na Oracle Cloud para centralizar ferramentas gerenciais, priorizando custo-benefício e performance.
-    • Active Directory Híbrido: Configuração de Windows Server local com foco em AD DS e DNS, aplicando conceitos de sincronização de identidade e sufixos UPN alternativos.
-    • Gestão de Endpoints: Implementação de soluções como MeshCentral para suporte remoto e GLPI (seguindo práticas ITIL) para inventário e gestão de chamados.
-    • Troubleshooting de Identidade: Documentação de resoluções de problemas complexos em sincronização híbrida e logs de erros no Entra Connect.
+    • Âncora de Identidade Local (On-Premises): O Windows Server (AD DS) atua como o controlador de domínio raiz, configurado localmente com um nível controlado de RAM para preservar o sistema host.
+    • Base Gerencial Permanente (OCI): Utiliza instâncias ARM Ampere da Oracle Cloud (Always Free) para hospedar o MeshCentral (acesso remoto) e o GLPI (inventário de ativos), garantindo disponibilidade 24/7 sem custos.
+    • Identidade Híbrida (Azure): Sincronização do diretório local com o Microsoft Entra ID através do Azure for Students, integrando a gestão de usuários com a nuvem.
+    • Gestão Administrativa: Uma estação Windows no Azure serve como máquina de gerenciamento para o setor de TI, permitindo administração remota de toda a infraestrutura.
 
-🌐 Módulo 2: Networking
-Objetivo: Garantir a conectividade segura e a segmentação do ambiente através de arquiteturas em camadas (Tiered).
+🌐 Módulo 2: Redes Híbridas e Conectividade (Networking)
+Objetivo: Garantir a conectividade segura, a segmentação do ambiente e a interoperabilidade entre provedores distintos através de arquiteturas em camadas e SD-WAN.
 
-    • Arquitetura VCN (Cloud): Segmentação de rede na OCI em subnets públicas (Edge) e privadas (Core), controladas por Security Lists rigorosas.
-    • Interconexão Site-to-Site: Estabelecimento de túneis VPN IPsec entre o perímetro local (FortiGate) e o Gateway da Oracle Cloud.
-    • Engenharia de Tráfego: Implementação de DHCP Relay híbrido e resolução de DNS Split-Brain para garantir que a nuvem e o ambiente local operem como uma rede unificada.
-    • Segurança de Perímetro: Otimização de regras de firewall e NAT para evitar falhas de conectividade e garantir o tráfego legítimo.
+    • Arquitetura VCN (Cloud): Segmentação de rede na Oracle Cloud (OCI) em subnets públicas (Edge) e privadas (Core), controladas por Security Lists e Network Security Groups (NSG) rigorosos para isolar serviços críticos.
+    • Interconexão Site-to-Site (IPsec): Estabelecimento de túneis VPN IPsec entre o perímetro local (FortiGate em Salvador) e o Gateway da Oracle Cloud para redundância e tráfego de alta prioridade.
+    • Rede Mesh (Tailscale SD-WAN): Implementação de uma rede privada criptografada que une todas as nuvens (OCI, Azure, DigitalOcean) e o ambiente local, permitindo comunicação transparente via IPs fixos da malha e MagicDNS.
+    • Engenharia de Tráfego e DNS: Implementação de DHCP Relay híbrido e resolução de DNS Split-Brain para garantir que a nuvem e o ambiente local operem como uma rede unificada, permitindo a resolução de nomes do AD local em todas as pontas.
+    • Segurança de Perímetro: Otimização de regras de firewall e NAT para evitar falhas de conectividade e garantir o tráfego legítimo entre os setores simulados (RH, Vendas e TI).
+    • Finalidade Setorial: Esta infraestrutura permite, por exemplo, que estações de trabalho do RH na Azure acessem servidores de arquivos na Oracle de forma segura e transparente.
 
-☣️ Módulo 3: Offensive Development & Red Team
-Objetivo: Desenvolver ferramentas customizadas e simular campanhas de ataque realistas para validar controles defensivos.
+🛡️ Módulo 3: SOC e Simulação Setorial (Offloading)
+Objetivo: Centralizar o monitoramento de segurança e simular departamentos corporativos reais.
 
-    • Comando e Controle (C2): Deploy de infraestruturas como Sliver ou Havoc em nuvem para orquestração de operações remotas.
-    • Malware Development (C++): Criação de loaders utilizando a WinAPI (VirtualAlloc, CreateThread) para execução de shellcode diretamente em memória, visando o bypass de soluções EDR.
-    • Post-Exploitation: Implementação de técnicas de persistência (chaves de registro/tarefas agendadas) e simulação de exfiltração de dados e movimentação lateral.
-    • Engenharia Social: Execução de campanhas simuladas de Phishing (Gophish) para testar o elo humano da segurança.
+    • Wazuh SIEM (OCI): Centralização de logs de todos os setores na Oracle Cloud, aproveitando os 24GB de RAM para o processamento de telemetria e análise de eventos.
+    • Distribuição de Ativos por Setor:
+        • Setor 1: RH/Adm: Estação Windows na Azure (vítima de phishing) e Servidor de Arquivos Linux na Oracle (alvo de exfiltração).
+        • Setor 2: Vendas: Estação Windows na Azure (alvo secundário) e Estações Linux Desktop leves (XFCE) na Oracle.
+        • Setor 3: TI/Dev: Servidores de Banco de Dados e Aplicações na Oracle e VM de Gerenciamento Windows na Azure.
 
-🛡️ Módulo 4: Blue Team & Incident Response
-Objetivo: Monitorar, detectar e responder a ameaças em tempo real utilizando telemetria avançada e automação.
+☣️ Módulo 4: Red Team e Operações Ofensivas
+Objetivo: Simular ameaças externas reais e táticas de pós-exploração.
 
-    • SIEM Centralizado: Implementação do Wazuh Manager na nuvem para coleta e correlação de logs de todo o ecossistema híbrido.
-    • Visibilidade de Endpoint: Implantação de telemetria avançada via Sysmon (configurado com SwiftOnSecurity) para monitoramento detalhado de processos e rede.
-    • Engenharia de Detecção: Criação de regras personalizadas (.xml) para identificar comportamentos específicos das ferramentas desenvolvidas no módulo ofensivo.
-    • Resposta a Incidentes: Configuração de Active Response para contenção automática de hosts comprometidos e produção de relatórios Post-Mortem profissionais.
+    • Infraestrutura de Ataque (DigitalOcean): Hospedagem isolada do Sliver C2 e do Gophish utilizando créditos do GitHub Student Pack.
+    • Cenário de Compromisso: Simulação de campanhas de engenharia social visando o setor de RH para obter acesso inicial, seguido de movimentação lateral e exfiltração de dados monitorada pelo SIEM.
+
+🚀 Módulo 5: Inovação e Big Data (GCP)
+Objetivo: Demonstrar proficiência em tecnologias nativas de nuvem e análise de dados.
+
+    • Orquestração (GKE): Utilização do Google Kubernetes Engine para rodar scanners de vulnerabilidades de forma containerizada.
+    • Analytics (BigQuery): Exportação de logs do Wazuh para análise estatística avançada no BigQuery e visualização de inteligência no Looker Studio.
 
 Analista Responsável: Bruno Eduardo  
 Status do Ecossistema: Operacional / Em expansão
-Última Auditoria: 27/01/2026
+Última Auditoria: 30/01/2026
