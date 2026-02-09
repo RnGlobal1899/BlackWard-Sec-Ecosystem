@@ -7,7 +7,7 @@ O laboratório é rigorosamente dividido em cinco módulos interdependentes, per
 🛠️ Módulo 1: Identidade e Infraestrutura de Gestão
 Objetivo: Estabelecer a base gerencial estável e a autoridade de identidade do ecossistema.
 
-    • Âncora de Identidade Local (On-Premises): O Windows Server (AD DS) atua como o controlador de domínio raiz, configurado localmente com um nível controlado de RAM para preservar o sistema host.
+    • Âncora de Identidade Local (On-Premises): O Windows Server 2022 (AD DS) atua como o controlador de domínio raiz, configurado localmente com um nível controlado de RAM para preservar o sistema host.
     • Base Gerencial Permanente (OCI): Utiliza instâncias ARM Ampere da Oracle Cloud (Always Free) para hospedar o MeshCentral (acesso remoto) e o GLPI (inventário de ativos), garantindo disponibilidade 24/7 sem custos.
     • Identidade Híbrida (Azure): Sincronização do diretório local com o Microsoft Entra ID através do Azure for Students, integrando a gestão de usuários com a nuvem.
     • Gestão Administrativa: Uma estação Windows no Azure serve como máquina de gerenciamento para o setor de TI, permitindo administração remota de toda a infraestrutura.
@@ -16,16 +16,17 @@ Objetivo: Estabelecer a base gerencial estável e a autoridade de identidade do 
 Objetivo: Garantir a conectividade segura, a segmentação do ambiente e a interoperabilidade entre provedores distintos através de arquiteturas em camadas e SD-WAN.
 
     • Arquitetura VCN (Cloud): Segmentação de rede na Oracle Cloud (OCI) em subnets públicas (Edge) e privadas (Core), controladas por Security Lists e Network Security Groups (NSG) rigorosos para isolar serviços críticos.
-    • Interconexão Site-to-Site (IPsec): Estabelecimento de túneis VPN IPsec entre o perímetro local (FortiGate) e o Gateway da Oracle Cloud para redundância e tráfego de alta prioridade.
     • Rede Mesh (Tailscale SD-WAN): Implementação de uma rede privada criptografada que une todas as nuvens (OCI, Azure, DigitalOcean) e o ambiente local, permitindo comunicação transparente via IPs fixos da malha e MagicDNS.
     • Engenharia de Tráfego e DNS: Implementação de DHCP Relay híbrido e resolução de DNS Split-Brain para garantir que a nuvem e o ambiente local operem como uma rede unificada, permitindo a resolução de nomes do AD local em todas as pontas.
     • Segurança de Perímetro: Otimização de regras de firewall e NAT para evitar falhas de conectividade e garantir o tráfego legítimo entre os setores simulados (RH, Vendas e TI).
     • Finalidade Setorial: Esta infraestrutura permite, por exemplo, que estações de trabalho do RH na Azure acessem servidores de arquivos na Oracle de forma segura e transparente.
 
+obs: A topologia de rede está no caminho /Infrastructure/Network.
+
 🛡️ Módulo 3: SOC e Simulação Setorial (Offloading)
 Objetivo: Centralizar o monitoramento de segurança e simular departamentos corporativos reais.
 
-    • Wazuh SIEM (OCI): Centralização de logs de todos os setores na Oracle Cloud, aproveitando os 24GB de RAM para o processamento de telemetria e análise de eventos.
+    • Elastic SIEM (OCI): Centralização de logs de todos os setores na Oracle Cloud, aproveitando os 16GB de RAM restantes para o processamento de telemetria e análise de eventos.
     • Distribuição de Ativos por Setor:
         • Setor 1: RH/Adm: Estação Windows na Azure (vítima de phishing) e Servidor de Arquivos Linux na Oracle (alvo de exfiltração).
         • Setor 2: Vendas: Estação Windows na Azure (alvo secundário) e Estações Linux Desktop leves (XFCE) na Oracle.
@@ -45,4 +46,4 @@ Objetivo: Demonstrar proficiência em tecnologias nativas de nuvem e análise de
 
 Analista Responsável: Bruno Eduardo  
 Status do Ecossistema: Operacional / Em expansão
-Última Auditoria: 07/02/2026
+Última Auditoria: 09/02/2026
