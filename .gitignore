@@ -16,4 +16,4 @@ Thumbs.db
 *.env
 
 // Note files
-.txt
+*.txt
