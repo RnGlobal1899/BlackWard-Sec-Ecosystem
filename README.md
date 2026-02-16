@@ -1,49 +1,43 @@
-                                 🏗️ BlackWard Security LAB: Architecture Overview 🛡️
+# **🏗️ BlackWard Security LAB: Architecture Overview 🛡️**
 
-Bem-vindo ao centro de documentação técnica do BlackWard Security LAB. Este projeto consiste na implementação de uma infraestrutura corporativa simulada de pequeno porte, distribuída em um ambiente Multi-Cloud Híbrido (Oracle Cloud, Azure, DigitalOcean e Google Cloud). O laboratório visa superar as limitações de hardware local (Athlon 3000G e 8GB de RAM), movendo cargas de trabalho críticas para a nuvem através de uma estratégia de offloading setorial e interconexão de alta disponibilidade.
+Bem-vindo ao centro de documentação técnica do BlackWard Security LAB. Este projeto consiste na implementação de uma infraestrutura corporativa simulada, distribuída em um ambiente Multi-Cloud Híbrido (Google Cloud Platform, Microsoft Azure e On-Premise). O laboratório foi arquitetado para superar as limitações severas de hardware local (Athlon 3000G e 8GB de RAM), movendo cargas de trabalho pesadas (SIEM, Gestão) para a nuvem através de uma estratégia de Cloud Offloading e interconexão de baixa latência.
 
-O laboratório é rigorosamente dividido em cinco módulos interdependentes, permitindo uma abordagem de aprendizado em 360 graus na área de Tecnologia da Informação e Segurança.
+O laboratório é rigorosamente dividido em quatro módulos interdependentes, permitindo uma abordagem de aprendizado em 360 graus em Cibersegurança, Redes e Nuvem.
 
-🛠️ Módulo 1: Identidade e Infraestrutura de Gestão
-Objetivo: Estabelecer a base gerencial estável e a autoridade de identidade do ecossistema.
+## **🛠️ Módulo 1: Identidade e Infraestrutura de Gestão**
+**Objetivo:** Estabelecer a base gerencial estável na GCP e a autoridade de identidade do ecossistema.
 
-    • Âncora de Identidade Local (On-Premises): O Windows Server 2022 (AD DS) atua como o controlador de domínio raiz, configurado localmente com um nível controlado de RAM para preservar o sistema host.
-    • Base Gerencial Permanente (OCI): Utiliza instâncias ARM Ampere da Oracle Cloud (Always Free) para hospedar o MeshCentral (acesso remoto) e o GLPI (inventário de ativos), garantindo disponibilidade 24/7 sem custos.
+    • Âncora de Identidade Local (On-Premises): O Windows Server 2022 (AD DS) virtualizado localmente atua como o controlador de domínio raiz, gerenciando usuários e políticas (GPO) com consumo mínimo de recursos.
+    • Base Gerencial Central (GCP): Utilização da instância srv-gcp-mgmt-01 (e2-standard-4, 16GB RAM) na Google Cloud para hospedar o stack de gestão via Docker: MeshCentral (acesso remoto a todos os nós), GLPI (inventário de ativos) e Portainer.
     • Identidade Híbrida (Azure): Sincronização do diretório local com o Microsoft Entra ID através do Azure for Students, integrando a gestão de usuários com a nuvem.
-    • Gestão Administrativa: Uma estação Windows no Azure serve como máquina de gerenciamento para o setor de TI, permitindo administração remota de toda a infraestrutura.
+    • Gestão de Endpoints: Administração centralizada de servidores Windows na Azure e Workstations locais através do túnel criptografado, eliminando a necessidade de VPNs legadas ou exposição de portas RDP/SSH.
 
-🌐 Módulo 2: Redes Híbridas e Conectividade (Networking)
-Objetivo: Garantir a conectividade segura, a segmentação do ambiente e a interoperabilidade entre provedores distintos através de arquiteturas em camadas e SD-WAN.
+## **🌐 Módulo 2: Redes Híbridas e Conectividade (Networking)**                                                                                                                               
+**Objetivo:** Garantir a conectividade segura, a segmentação do ambiente e a interoperabilidade entre provedores distintos através de arquiteturas em camadas e SD-WAN.
 
-    • Arquitetura VCN (Cloud): Segmentação de rede na Oracle Cloud (OCI) em subnets públicas (Edge) e privadas (Core), controladas por Security Lists e Network Security Groups (NSG) rigorosos para isolar serviços críticos.
-    • Rede Mesh (Tailscale SD-WAN): Implementação de uma rede privada criptografada que une todas as nuvens (OCI, Azure, DigitalOcean) e o ambiente local, permitindo comunicação transparente via IPs fixos da malha e MagicDNS.
-    • Engenharia de Tráfego e DNS: Implementação de DHCP Relay híbrido e resolução de DNS Split-Brain para garantir que a nuvem e o ambiente local operem como uma rede unificada, permitindo a resolução de nomes do AD local em todas as pontas.
+    • Arquitetura VCN (Google Cloud): Configuração de rede na região us-east1 com regras de firewall restritivas (bloqueio total de SSH público), permitindo acesso apenas via IAP (Identity-Aware Proxy) ou malha interna.
+    • Rede Mesh (Tailscale SD-WAN): Implementação de uma malha Zero Trust que interconecta todas as nuvens e o ambiente local. A comunicação flui através de túneis criptografados (WireGuard) utilizando IPs fixos e imutáveis (100.x.y.z).
+    • Engenharia de Tráfego e DNS: Uso do MagicDNS para resolução de nomes global (ex: ping srv-rh-azure) e configuração de ACLs (Access Control Lists) para segmentação lógica (ex: impedir que o setor de Vendas acesse o segmento de Gestão na GCP).
     • Segurança de Perímetro: Otimização de regras de firewall e NAT para evitar falhas de conectividade e garantir o tráfego legítimo entre os setores simulados (RH, Vendas e TI).
-    • Finalidade Setorial: Esta infraestrutura permite, por exemplo, que estações de trabalho do RH na Azure acessem servidores de arquivos na Oracle de forma segura e transparente.
+    • Interoperabilidade: O ambiente local atua como um "Spoke" que consome serviços hospedados no "Hub" da Google Cloud com latência otimizada.
 
 obs: A topologia de rede está no caminho /Infrastructure/Network.
 
-🛡️ Módulo 3: SOC e Simulação Setorial (Offloading)
-Objetivo: Centralizar o monitoramento de segurança e simular departamentos corporativos reais.
+## **🛡️ Módulo 3: SOC e Monitoramento Avançado (Blue Team)**
+**Objetivo:** Centralizar a inteligência de segurança na nuvem, utilizando hardware de alta performance para detecção de ameaças.
 
-    • Elastic SIEM (OCI): Centralização de logs de todos os setores na Oracle Cloud, aproveitando os 16GB de RAM restantes para o processamento de telemetria e análise de eventos.
-    • Distribuição de Ativos por Setor:
-        • Setor 1: RH/Adm: Estação Windows na Azure (vítima de phishing) e Servidor de Arquivos Linux na Oracle (alvo de exfiltração).
-        • Setor 2: Vendas: Estação Windows na Azure (alvo secundário) e Estações Linux Desktop leves (XFCE) na Oracle.
-        • Setor 3: TI/Dev: Servidores de Banco de Dados e Aplicações na Oracle e VM de Gerenciamento Windows na Azure.
+    • Elastic Stack SIEM (GCP): O coração do SOC reside na instância dedicada srv-gcp-soc-01 (16GB RAM, SSD Persistente). Ela processa logs de todo o ecossistema híbrido utilizando Elasticsearch e Kibana Dockerizados.
+    • Telemetria Estendida (XDR):
+        • Elastic Agent + Sysmon: Implantados nos Servidores de Arquivos da Azure e no Controlador de Domínio Local para enriquecimento de logs (Event IDs 1, 3, 11, etc.).
+        • Honeyfiles: Criação de arquivos-armadilha ("folha_pagamento.xlsx") nos servidores da Azure para detecção proativa de acesso não autorizado.
 
-☣️ Módulo 4: Red Team e Operações Ofensivas
-Objetivo: Simular ameaças externas reais e táticas de pós-exploração.
+## **☣️ Módulo 4: Red Team e Operações Ofensivas**
+**Objetivo:** Simular ataques direcionados à infraestrutura Microsoft (Windows Server e AD).
 
-    • Infraestrutura de Ataque (DigitalOcean): Hospedagem isolada do Sliver C2 e do Gophish utilizando créditos do GitHub Student Pack.
-    • Cenário de Compromisso: Simulação de campanhas de engenharia social visando o setor de RH para obter acesso inicial, seguido de movimentação lateral e exfiltração de dados monitorada pelo SIEM.
+    • Infraestrutura de Ataque Flexível (C2): A hospedagem dos frameworks de Comando e Controle (Sliver C2, Havoc, Gophish) é descentralizada e resiliente. Prevê-se a utilização futura da Oracle Cloud (Free Tier ARM) para aproveitar o poder computacional gratuito ou instâncias na DigitalOcean (via GitHub Student Pack), garantindo o isolamento total entre a infraestrutura de ataque e a de defesa.
+    • Desenvolvimento de Malware: Desenvolvimento de Malware: Criação de artefatos personalizados em C++ utilizando WinAPI (VirtualAlloc, CreateThread) para injetar payloads em memória, focando na evasão de assinaturas estáticas.
 
-🚀 Módulo 5: Inovação e Big Data (GCP)
-Objetivo: Demonstrar proficiência em tecnologias nativas de nuvem e análise de dados.
+**Analista Responsável:** Bruno Eduardo  
+**Status do Ecossistema:** Operacional (Migrado para GCP/Híbrido)                                                                                                            
+**Última Atualização:** 15/02/2026
 
-    • Orquestração (GKE): Utilização do Google Kubernetes Engine para rodar scanners de vulnerabilidades de forma containerizada.
-    • Analytics (BigQuery): Exportação de logs do Wazuh para análise estatística avançada no BigQuery e visualização de inteligência no Looker Studio.
-
-Analista Responsável: Bruno Eduardo  
-Status do Ecossistema: Operacional / Em expansão
-Última Auditoria: 09/02/2026
