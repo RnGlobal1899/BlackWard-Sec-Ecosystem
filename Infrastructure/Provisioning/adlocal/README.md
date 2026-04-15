@@ -39,6 +39,9 @@ Para garantir total previsibilidade de roteamento antes da camada SD-WAN, a VM f
 | **Gateway Padrão** | 10.10.1.2 (gateway padrão VMware NAT) |
 | **DNS Primário** | 10.10.1.20 (auto-referência — DC é autoridade DNS) |
 
+![Domínio Adquirido na NameCheap](images/ip.png)
+ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 1: IP configurado
+
 ---
 
 ## 3.1.2 Especificações da VM e Configuração Base
@@ -108,6 +111,15 @@ A estrutura de Unidades Organizacionais foi projetada para refletir a segmentaç
 | **VENDAS** | José · Usuário de teste para simulações de segmentação e controle de acesso |
 
 A separação em OUs também é o pré-requisito para o Módulo 3 (SOC/Blue Team): o Elastic Agent implantado no DC captura eventos de autenticação e mudanças de diretório por OU, permitindo a criação de alertas direcionados no Kibana — por exemplo, qualquer tentativa de login de uma conta do OU VENDAS em uma estação do OU TI/SOC.
+
+![Pastas do AD](images/pastas.png)
+ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 2: Pastas do AD
+
+![Máquinas ingressadas](images/Máquinas_ingressadas.png)
+ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 3: Máquinas ingressadas
+
+![Usuários por setor](images/Usuários_por_setor.png)
+ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 4: Usuários
 
 ---
 
