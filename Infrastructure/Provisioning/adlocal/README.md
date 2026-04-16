@@ -115,7 +115,7 @@ A separação em OUs também é o pré-requisito para o Módulo 3 (SOC/Blue Team
 ![Pastas do AD](images/pastas.png)
 ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 2: Pastas do AD
 
-![Máquinas ingressadas](images/Máquinas_ingressadas.png)
+![Máquinas ingressadas](images/Máquinas_Ingressadas.png)
 ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 3: Máquinas ingressadas
 
 ![Usuários por setor](images/Usuários_por_setor.png)
