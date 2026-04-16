@@ -9,7 +9,7 @@
  
 ---
  
-Este relatório documenta a expansão da infraestrutura simulada para a Microsoft Azure. O foco desta etapa foi o provisionamento de dois servidores baseados em Windows Server 2022 (Azure Edition) atuando como endpoints departamentais (RH e Vendas), garantindo governança de custos (FinOps), gestão remota segura sem exposição pública e troubleshooting complexo de roteamento e DNS em um ambiente multicloud integrado via malha Zero Trust.
+Este relatório documenta a expansão da infraestrutura simulada para a Microsoft Azure. Nessa etapa foi feito o provisionamento de dois servidores baseados em Windows Server 2022 (Azure Edition) atuando como endpoints departamentais (RH e Vendas), garantindo governança de custos (FinOps), gestão remota segura sem exposição pública e troubleshooting complexo de roteamento e DNS em um ambiente multicloud integrado via malha Zero Trust. Além disso, posteriormente, foi feita a sincronização do Active Directory local (AD-LOCAL-01) com a nuvem da Microsoft (Entra ID), adotando o domínio oficial blackwardsecurity.xyz. O foco arquitetural foi duplo: criar uma superfície de ataque realista para o laboratório (Red Team) e habilitar a telemetria de nuvem para caça a ameaças (Blue Team), mantendo controle cirúrgico sobre quais objetos locais são expostos à internet.
  
 ---
  
@@ -207,3 +207,112 @@ A execução deste módulo reforçou habilidades fundamentais em infraestrutura 
 | 🤖 **Automação (PowerShell)** | Provisionamento headless de pacotes via Chocolatey, manipulação de serviços, injeção silenciosa de credenciais (RustDesk) e manipulação dinâmica de categorias de rede (Public vs. Private profiles). |
 | 🌐 **Troubleshooting Avançado** | Diagnóstico preciso do comportamento de DNS Round Robin em controladores de domínio multi-homed (múltiplas interfaces) e resolução baseada em prioridade local (`hosts`). |
 | 🔐 **Microssegmentação / Firewalling** | Manipulação programática do Windows Defender Firewall (`New-NetFirewallRule`) focada em escopos IP limitados (`100.64.0.0/10`) para sustentar arquiteturas Zero Trust. |
+
+---
+ 
+## **3.3.6 Padronização do Tecido de Identidade (Correio e UPN)**
+ 
+Antes de iniciar qualquer sincronização, as identidades foram rigorosamente padronizadas. Contas de e-mail (ex: `bruno.analyst@blackwardsecurity.xyz`, `jose.vendas@blackwardsecurity.xyz`) e listas de distribuição corporativas (ex: `ti@`, `rh@`) foram criadas no Zoho Mail e alinhadas aos atributos UPN dos objetos no AD.
+ 
+**Por que:** Em cenários de Red Team (testes de phishing e movimentação lateral) e Blue Team (investigação de exfiltração via e-mail), é mandatório que o objeto do usuário no AD tenha exata correspondência com sua caixa de correio real. Um UPN que não resolve para uma caixa válida quebra a fidelidade das simulações. Essa consistência cria um ambiente de altíssima fidelidade para ambos os times.
+ 
+ ![Usuários criados no zoho mail](images/novos_usuários.png)
+ ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 8: Usuários criados no zoho mail
+
+ ![Grupos criados no zoho mail](images/grupos_criados.png)
+ ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 8: Grupos criados no zoho mail
+
+---
+ 
+## **3.3.7 Validação de Domínio e Autenticação DNS (Cloudflare)**
+ 
+Para garantir a integridade do namespace corporativo, o domínio `blackwardsecurity.xyz` foi verificado perante a Microsoft através da criação de um registro TXT no Cloudflare:
+ 
+| Tipo | Nome | Valor |
+|---|---|---|
+| TXT | @ | `MS=ms34900680` |
+ 
+**Por que:** Sem essa validação, o Entra ID faria um *fallback* de todas as identidades sincronizadas, alterando forçadamente os logins para o domínio temporário `@<tenant>.onmicrosoft.com`. A verificação via DNS garantiu que todos os UPNs sincronizados mantivessem o formato `@blackwardsecurity.xyz`, preservando a integridade do namespace em toda a cadeia de identidade.
+  
+ ![TXT para adicionar ao CloudFlare](images/Campos_txt.png)
+ ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 8: TXT para adicionar ao CloudFlare
+
+ ![Registro DNS adicionado ao CloudFlare](images/record_dns_adicionado.png)
+ ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 8: Registro DNS adicionado ao CloudFlare
+
+---
+ 
+## **3.3.8 Governança e Princípio do Menor Privilégio (PoLP)**
+ 
+> **Princípio Arquitetural:** Separação de Privilégios na Nuvem. A maioria das empresas comete o erro crítico de utilizar uma conta de *Global Admin* para a instalação do Entra Connect — expondo toda a assinatura Azure a uma credencial que estará persistida na memória de um servidor on-premises.
+ 
+Para realizar a sincronização, criei um usuário dedicado na nuvem (`adsync@blackwardsecurity.xyz`) e atribuí a ele estritamente a função de **Hybrid Identity Administrator**, ativando o MFA logo no primeiro acesso.
+ 
+**Por que:** Ao aplicar o Princípio do Menor Privilégio (PoLP), garanto que, se o servidor local for comprometido e a credencial for extraída da memória (ex: via Mimikatz/LSASS dump), o raio de explosão fica contido: a conta só tem escopo para gerenciar usuários do diretório. O restante da infraestrutura Azure — bancos de dados, assinaturas, políticas de segurança — permanece isolado e protegido.
+ 
+| Parâmetro | Decisão |
+|---|---|
+| **Conta de Serviço** | `adsync@blackwardsecurity.xyz` (dedicada, não compartilhada) |
+| **Função Atribuída** | Hybrid Identity Administrator (não Global Admin) |
+| **MFA** | Ativado no primeiro acesso |
+| **Escopo de Comprometimento** | Limitado à gestão de objetos de usuário |
+ 
+  ![Usuário dedicado para sync](images/usuario_dedicado.png)
+ ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 8: Usuário dedicado para sync
+
+---
+ 
+## **3.3.9 Instalação Customizada do Microsoft Entra Connect**
+ 
+A instalação do Microsoft Entra Connect foi conduzida rejeitando expressamente a opção "Express Settings", optando pela configuração **Custom**. Essa escolha não é preferência estética — a instalação expressa aplica permissões e escopos de sincronização que reduzem a visibilidade e o controle granular necessários para um laboratório de segurança.
+ 
+| Parâmetro | Configuração Aplicada |
+|---|---|
+| **Modo de Instalação** | Custom (Express Settings rejeitado) |
+| **Método de Sincronização** | Password Hash Sync (PHS) |
+| **Single Sign-On** | Ativado (SSO Seamless) |
+| **Banco de Dados** | LocalDB (provisionado nativamente pelo assistente) |
+| **Conta de Serviço AD** | Provisionada automaticamente pelo assistente (MSOL_) |
+ 
+### **Decisão Arquitetural — Red Team: Injeção Deliberada da Conta `MSOL_`**
+ 
+> **Decisão Arquitetural (Red Team):** Ao não fornecer uma conta de serviço pré-existente durante a instalação, o assistente é obrigado a provisionar automaticamente a conta `MSOL_` com **privilégios de replicação de diretório** (*Directory Replication Service*). Esta conta é um alvo primário documentado para o ataque **DCSync** — uma técnica que simula o comportamento de um Domain Controller secundário para extrair hashes NT de todos os usuários do domínio sem gerar logs de acesso direto ao NTDS.dit. Sua presença foi deliberadamente planejada para viabilizar os cenários ofensivos do Módulo 4.
+ 
+### **Decisão Arquitetural — Blue Team: Filtragem Cirúrgica de OUs**
+ 
+A etapa de OU Filtering é onde a maioria das instalações corporativas falha por omissão. A prática padrão de sincronizar a raiz do domínio inteira expõe contas de serviço e objetos de infraestrutura à nuvem — ampliando desnecessariamente a superfície de ataque.
+ 
+A abordagem adotada foi oposta: a raiz do domínio foi desmarcada e apenas as OUs de negócio foram selecionadas manualmente.
+ 
+| OU Sincronizada | Justificativa |
+|---|---|
+| **TI/SOC** | Contas humanas de analistas — objeto legítimo de governança de nuvem |
+| **RH** | Contas humanas departamentais — idem |
+| **VENDAS** | Contas humanas departamentais — idem |
+| ~~Builtin~~ | **Bloqueado** — contas de serviço nativas do Windows Server |
+| ~~Domain Controllers~~ | **Bloqueado** — objetos de infraestrutura crítica jamais devem transitar para a nuvem |
+| ~~Computers~~ | **Bloqueado** — contas de máquina não têm identidade humana no Entra ID |
+ 
+**Por que:** Essa filtragem reduziu drasticamente a superfície de ataque e o ruído de sincronização, garantindo que o Entra ID recebesse estritamente os usuários humanos que farão login nos ativos corporativos — e nada mais.
+ 
+---
+ 
+   ![Diretório conectado](images/diretório_conectado.png)
+ ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 8: Diretório conectado
+
+   ![Instalando entra connect](images/Instalando_entra_connect.png)
+ ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 8: Instalando entra connect
+
+   ![Usuários adicionados ao azure](images/usuários_add_azure.png)
+ ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤfigura 8: Usuários adicionados ao azure
+
+## **3.3.10 Skills e Competências Adquiridas**
+ 
+A integração híbrida validou competências avançadas que unem a administração de infraestrutura com a visão estratégica de um especialista em segurança.
+ 
+| **Área** | **Competência** |
+|---|---|
+| ☁️ **Cloud IAM (Identity & Access Management)** | Federação de diretórios locais com Microsoft Entra ID via Azure AD Connect, validação de FQDN via registros TXT (Cloudflare) e aplicação de RBAC estrito (Hybrid Identity Admin). |
+| 🛡️ **SecOps / Blue Team (Defesa)** | Redução sistemática de superfície de ataque em ambientes híbridos através de OU Filtering, impedindo a exposição de contas de serviço e objetos de infraestrutura críticos à nuvem. |
+| ⚔️ **Engenharia Ofensiva / Red Team** | Modelagem deliberada de ameaças *(Threat Modeling)* durante o provisionamento, injetando intencionalmente alvos de alto valor (conta `MSOL_`) para viabilizar simulações de ataques de replicação de diretório (DCSync). |
+| 🔐 **Governança Zero Trust** | Implementação de fluxos de autenticação unificados (SSO e Password Hash Sync) amarrados ao Princípio do Menor Privilégio (PoLP) e MFA na fundação da arquitetura. |
